@@ -38,7 +38,7 @@ export const cloneAzureRepoAction = (options: {
     description: "Clone an Azure repository into the workspace directory.",
     schema: {
       input: {
-        required: ["repoUrl", "remoteUrl"],
+        required: ["remoteUrl"],
         type: "object",
         properties: {
           organization: {
