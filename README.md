@@ -24,7 +24,7 @@ You need to configure the actions in your backend:
 
 ```sh
 # From your Backstage root directory
-yarn add --cwd packages/backend @parfuemerie-douglas/scaffolder-backend-module-azure-repositories
+yarn add --cwd packages/backend @antoniobergas/scaffolder-backend-module-azure-repositories
 ```
 
 Configure the actions (you can check the
@@ -93,7 +93,9 @@ for authorization. The PAT requires `Read` permission for `Code` for the
 integrations:
   azure:
     - host: dev.azure.com
-      token: ${AZURE_TOKEN}
+      credentials:
+        - personalAccessToken: ${      token: ${AZURE_TOKEN}
+}
 ```
 
 Read more on integrations in Backstage in the [Integrations

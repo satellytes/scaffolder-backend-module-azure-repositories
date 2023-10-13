@@ -18,6 +18,7 @@ import { Logger } from "winston";
 import * as azdev from "azure-devops-node-api";
 import * as GitApi from "azure-devops-node-api/GitApi";
 import * as GitInterfaces from "azure-devops-node-api/interfaces/GitInterfaces";
+import { IRequestHandler } from "azure-devops-node-api/interfaces/common/VsoBaseInterfaces";
 
 export async function cloneRepo({
   dir,
@@ -118,25 +119,21 @@ export async function commitAndPushBranch({
 
 export async function createADOPullRequest({
   gitPullRequestToCreate,
-  server,
-  auth,
+  url,
+  authHandler,
   repoId,
   project,
   supportsIterations,
 }:{
   gitPullRequestToCreate: GitInterfaces.GitPullRequest;
-  server: string;
-  auth: { org: string; token: string };
+  url: string;
+  authHandler: IRequestHandler;
   repoId: string;
   project?: string;
   supportsIterations?: boolean;
-}): Promise<void> {
-  const url = `https://${server}/`;
-  const orgUrl = url + auth.org;
-  const token: string = auth.token || ""; // process.env.AZURE_TOKEN || "";
+}): Promise<void> {// process.env.AZURE_TOKEN || "";
 
-  const authHandler = azdev.getPersonalAccessTokenHandler(token);
-  const connection = new azdev.WebApi(orgUrl, authHandler);
+  const connection = new azdev.WebApi(url, authHandler);
 
   const gitApiObject: GitApi.IGitApi = await connection.getGitApi();
 
