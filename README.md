@@ -94,8 +94,7 @@ integrations:
   azure:
     - host: dev.azure.com
       credentials:
-        - personalAccessToken: ${      token: ${AZURE_TOKEN}
-}
+        - personalAccessToken: ${AZURE_TOKEN}
 ```
 
 Read more on integrations in Backstage in the [Integrations
