@@ -1,8 +1,9 @@
-import {ScmIntegrationRegistry} from "@backstage/integration";
+import { DefaultAzureDevOpsCredentialsProvider, ScmIntegrationRegistry } from "@backstage/integration";
 import { createTemplateAction } from "@backstage/plugin-scaffolder-backend";
-import {InputError} from "@backstage/errors";
-import { createADOPullRequest} from "../helpers";
+import { InputError } from "@backstage/errors";
+import { createADOPullRequest } from "../helpers";
 import * as GitInterfaces from "azure-devops-node-api/interfaces/GitInterfaces";
+import { getPersonalAccessTokenHandler, getBearerHandler } from "azure-devops-node-api";
 
 /**
  * Creates an `ado:repo:pr` Scaffolder action.
@@ -91,16 +92,12 @@ export const pullRequestAzureRepoAction = (options: {
       const targetBranch = `refs/heads/${ctx.input.targetBranch}` ?? `refs/heads/main`;
 
       const host = server ?? "dev.azure.com";
-      const integrationConfig = integrations.azure.byHost(host);
+      const type = integrations.byHost(host)?.type;
 
-      if (!integrationConfig) {
+      if (!type) {
         throw new InputError(
-          `No matching integration configuration for host ${host}, please check your integrations config`
+          `No matching integration configuration for host ${host}, please check your integrations config`,
         );
-      }
-
-      if (!integrationConfig.config.token && !ctx.input.token) {
-        throw new InputError(`No token provided for Azure Integration ${host}`);
       }
 
       const pullRequest: GitInterfaces.GitPullRequest = {
@@ -109,13 +106,29 @@ export const pullRequestAzureRepoAction = (options: {
         title: title,
       } as GitInterfaces.GitPullRequest;
 
-      const org = ctx.input.organization ?? 'notempty';
-      const token = ctx.input.token ?? integrationConfig.config.token!;
+      const organization = ctx.input.organization ?? 'notempty';
+      const url = `https://${host}/${organization}`;
+
+      const credentialProvider =
+        DefaultAzureDevOpsCredentialsProvider.fromIntegrations(integrations);
+      const credentials = await credentialProvider.getCredentials({ url: url });
+
+      if (credentials === undefined && ctx.input.token === undefined) {
+        throw new InputError(
+          `No credentials provided ${url}, please check your integrations config`,
+        );
+      }
+
+      const authHandler =
+        ctx.input.token || credentials?.type === 'pat'
+          ? getPersonalAccessTokenHandler(ctx.input.token ?? credentials!.token)
+          : getBearerHandler(credentials!.token);
+
 
       await createADOPullRequest({
         gitPullRequestToCreate: pullRequest,
-        server: server,
-        auth: { org: org, token: token },
+        url: url,
+        authHandler: authHandler,
         repoId: repoId,
         project: project,
         supportsIterations: supportsIterations,
