@@ -16,7 +16,7 @@
 
 import { Config } from "@backstage/config";
 import { InputError } from "@backstage/errors";
-import { ScmIntegrationRegistry } from "@backstage/integration";
+import { DefaultAzureDevOpsCredentialsProvider, ScmIntegrationRegistry } from "@backstage/integration";
 import { createTemplateAction } from "@backstage/plugin-scaffolder-backend";
 
 import { commitAndPushBranch } from "../helpers";
@@ -29,6 +29,7 @@ export const pushAzureRepoAction = (options: {
   const { integrations, config } = options;
 
   return createTemplateAction<{
+    organization?: string;
     branch?: string;
     sourcePath?: string;
     gitCommitMessage?: string;
@@ -45,6 +46,11 @@ export const pushAzureRepoAction = (options: {
         required: [],
         type: "object",
         properties: {
+          organization: {
+            title: 'Organization Name',
+            type: 'string',
+            description: 'The name of the organization in Azure DevOps.',
+          },
           branch: {
             title: "Repository Branch",
             type: "string",
@@ -96,19 +102,28 @@ export const pushAzureRepoAction = (options: {
       );
 
       const host = server ?? "dev.azure.com";
-      const integrationConfig = integrations.azure.byHost(host);
+      const type = integrations.byHost(host)?.type;
 
-      if (!integrationConfig) {
+      if (!type) {
         throw new InputError(
-          `No matching integration configuration for host ${host}, please check your integrations config`
+          `No matching integration configuration for host ${host}, please check your integrations config`,
         );
       }
 
-      if (!integrationConfig.config.token && !ctx.input.token) {
-        throw new InputError(`No token provided for Azure Integration ${host}`);
+      const organization = ctx.input.organization ?? 'notempty';
+      const url = `https://${host}/${organization}`;
+
+      const credentialProvider =
+        DefaultAzureDevOpsCredentialsProvider.fromIntegrations(integrations);
+      const credentials = await credentialProvider.getCredentials({ url: url });
+
+      if (credentials === undefined && ctx.input.token === undefined) {
+        throw new InputError(
+          `No credentials provided ${url}, please check your integrations config`,
+        );
       }
 
-      const token = ctx.input.token ?? integrationConfig.config.token!;
+      const token = ctx.input.token ?? credentials!.token;
 
       const gitAuthorInfo = {
         name: gitAuthorName
