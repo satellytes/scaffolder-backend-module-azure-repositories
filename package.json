@@ -1,5 +1,5 @@
 {
-  "name": "@parfuemerie-douglas/scaffolder-backend-module-azure-repositories",
+  "name": "@antoniobergas/scaffolder-backend-module-azure-repositories",
   "version": "0.2.5",
   "description": "A collection of Backstage scaffolder backend modules for Azure repositories.",
   "main": "dist/index.cjs.js",
@@ -24,7 +24,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Parfuemerie-Douglas/scaffolder-backend-module-azure-repositories.git"
+    "url": "git+https://github.com/antoniobergas/scaffolder-backend-module-azure-repositories.git"
   },
   "keywords": [
     "backstage",
@@ -36,9 +36,9 @@
   "author": "Parfümerie Douglas GmbH",
   "license": "Apache-2.0",
   "bugs": {
-    "url": "https://github.com/Parfuemerie-Douglas/scaffolder-backend-module-azure-repositories/issues"
+    "url": "https://github.com/antoniobergas/scaffolder-backend-module-azure-repositories/issues"
   },
-  "homepage": "https://github.com/Parfuemerie-Douglas/scaffolder-backend-module-azure-repositories#readme",
+  "homepage": "https://github.com/antoniobergas/scaffolder-backend-module-azure-repositories#readme",
   "dependencies": {
     "@backstage/backend-common": "^0.19.7",
     "@backstage/config": "^1.1.0",
