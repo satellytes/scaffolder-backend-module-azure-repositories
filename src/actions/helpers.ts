@@ -43,6 +43,7 @@ export async function cloneRepo({
   await git.clone({
     url: remoteUrl,
     dir,
+    depth: 1,
   });
 
   await git.addRemote({
